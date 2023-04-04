@@ -1,5 +1,7 @@
 #include "PIFilter.h"
 #include "PIDefines.h"
+#include "PIActions.h"
+#include "PIUSuites.h"
 
 DLLExport MACPASCAL void PluginMain(const int16 selector,
                                     FilterRecordPtr filterRecord,
@@ -17,14 +19,15 @@ DLLExport MACPASCAL void PluginMain(const int16 selector,
       PSActionDescriptorProcs *descriptorProcs = NULL;
       PSActionControlProcs *actionControlProcs = NULL;
       
-      descriptorProcs = (PSActionDescriptorProcs*)filterRecord->sSPBasic->AcquireProc(kPSActionDescriptorProcs);
-      actionControlProcs = (PSActionControlProcs*)filterRecord->sSPBasic->AcquireProc(kPSActionControlProcs);
+        sPSActionDescriptor = ((PSActionDescriptorProcs*)filterRecord->handleProcs->handle[0]);
+        sPSActionControl = ((PSActionControlProcs*)filterRecord->handleProcs->handle[1]);
+
 
       if (descriptorProcs && actionControlProcs) {
         // Create an action reference targeting the current selection.
         PIActionReference selectionRef;
-        descriptorProcs->Make(ref, &selectionRef);
-        descriptorProcs->PutClass(selectionRef, classSelection);
+        descriptorProcs->Make(selectionRef, &selectionRef);
+        descriptorProcs->PutClass(selectionRef, cSelection);
 
         // Create an action descriptor containing the foreground color as the fill color.
         PIActionDescriptor fillDesc;
@@ -38,8 +41,8 @@ DLLExport MACPASCAL void PluginMain(const int16 selector,
         actionControlProcs->Play(eventDeselect, NULL, plugInDialogSilent);
 
         // Release resources.
-        filterRecord->sSPBasic->ReleaseProc((intptr_t)descriptorProcs);
-        filterRecord->sSPBasic->ReleaseProc((intptr_t)actionControlProcs);
+        // No need to release resources in this case, as they're managed by the Photoshop SDK.
+
       }
     }
 
